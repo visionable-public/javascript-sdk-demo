@@ -142,7 +142,7 @@ function App() {
       <Stack sx={{ maxWidth: "300px", p: 2, gap: 2 }}>
         <img src={`https://${SERVER}/images/visionable-login-logo.svg`} />
 
-        <p><Link href="https://bitbucket.org/visionable_development/visionable-js-sdk/">View the source code and documentation</Link></p>
+        <p><Link href="https://github.com/visionable-public/javascript-sdk-demo">View the source code and documentation</Link></p>
 
         <FormControl>
           <TextField

@@ -19,7 +19,7 @@ const SERVER = "app.visionable.one";
 function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [meetingId, setMeetingId] = useState("9837741a-4f5a-4be2-892c-95d4ff08da35");
+  const [meetingId, setMeetingId] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [videoDevice, setVideoDevice] = useState("default");
   const [videoDevices, setVideoDevices] = useState(["default"]);

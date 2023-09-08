@@ -2,8 +2,7 @@
 
 [SDK Documentation](https://visionable.readme.io/v3.0-dev/docs/javascript-getting-started)
 
-## Demo
-[See this demo live](https://visionable-public.github.io/javascript-sdk-demo/dist/)
+[Live Demo](https://visionable-public.github.io/javascript-sdk-demo/dist/)
 
 ## Installation
 

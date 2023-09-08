@@ -5,86 +5,68 @@
 [Live Demo](https://visionable-public.github.io/javascript-sdk-demo/dist/)
 
 ## Installation
-
-### Install the library directly from the repository:
-```
+```console
 npm install bitbucket:visionable_development/visionable-js-sdk#v1.0.1
 ```
 
-### Import into your source code
-```
+## Initialization
+
+```js
 import { VisiWebRTC } from 'visionable-js-sdk';
-```
 
-### Initialization
+// use the Meeting API to create a meeting
+// https://visionable.readme.io/v3.0-dev/reference/postmeeting
+const meetingID = "56cf228b-af75-421e-9ff1-dfe7c849d1a1";
 
-```
+// Instantiate
 const visiClient = new VisiWebRTC({
-  server: SERVER,
-  email,
-  password,
-  meetingID,
-  name,
+  server: "app.visionable.one",
+  email: undefined, // authentication is optional
+  password: undefined, // leave email & password undefined to join as a guest
+  meetingID: meetingID, // optional if authenticating with email & password
+  name: "Test User 1",
   callback: function(err, jwt) {
     if (err) {
       // handle error
-      return;
     }
-
-    joinMeeting(meetingId)
   }
 });
 ```
 
-```
-const joinMeeting = (meetingId) => {
+## Joining a Meeting
+```js
   visiClient.connectToMeeting({
-    meeting_id: meetingId,
+    meeting_id: meetingID,
     videoStreamAdded: function(id, email, name, camera, isScreenShare) {
-      // optionally, don't get your stream from the server, use the local stream
-      if (name === displayName) {
-        setVideoStreams((vs) => {
-          const localStream = vs.find((s) => s.id === "local");
-          const rest = vs.filter((s) => s.id !== "local");
-          return [...rest, { id, email, name, camera, isScreenShare, stream: localStream.stream }]
-        });
+      // this callback is called for local and remote videos
 
-        return;
-      }
-
-      // automatically enable all remote video streams
+      // to automatically enable all video streams
       visiClient.enableRemoteVideo(id, function(err, stream) {
         if (err) {
-          console.log(err);
-          alert(JSON.stringify(err));
+          // handle error
         }
-
-        setVideoStreams((vs) => [...vs, { id, email, name, camera, isScreenShare, stream }])
+        // add video stream to data structure
+        // e.g. setVideoStreams((vs) => [...vs, { id, email, name, camera, isScreenShare, stream }])
       });
     },
     videoStreamRemoved: function(id) {
-      setVideoStreams((vs) => vs.filter((v) => v.id !== id));
+      // remove video stream from data structure
+      // e.g. setVideoStreams((vs) => vs.filter((v) => v.id !== id));
     },
     callback: function(err, video_receive_max) {
       if (err) {
-        console.log(err);
-        alert(err);
+        // handle error
         return;
       }
 
-      setInMeeting(true);
+      // to automatically enable local video on meeting-join
+      visiClient.enableLocalVideo(function(stream) {
+        // add local stream to data structure
+        // e.g. setVideoStreams((vs) => [...vs, { id: "local", stream }])
 
-      visiClient.enableLocalVideo(function(stream) { // enable local video
-        setVideoStreams((vs) => [...vs, { id: "local", stream }])
-        setVideoEnabled(true);
-
-        visiClient.enableAudio(); // enable all audio
-
-        setLoading(false);
-      }, null, null, videoDevice);
+        // to automatically enable audio on meeting-join
+        visiClient.enableAudio();
+      });
     }
   })
-};
-
 ```
-

@@ -2,7 +2,6 @@
   "name": "web-demo",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -15,7 +14,7 @@
     "@mui/material": "^5.14.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "visionable-js-sdk": "git+https://bitbucket.org/visionable_development/visionable-js-sdk.git#439ef1c"
+    "visionable-js-sdk": "git+https://bitbucket.org/visionable_development/visionable-js-sdk.git#v1.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

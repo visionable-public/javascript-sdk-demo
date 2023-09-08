@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 
 const SERVER = "app.visionable.one";
-let visiClient;
+// let visiClient;
 
 function App() {
   const [email, setEmail] = useState("");
@@ -29,9 +29,13 @@ function App() {
   const [inputMuted, setInputMuted] = useState(false);
   const [outputMuted, setOututMuted] = useState(false);
   const [client, setClient] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  let visiClient = null;
 
   const connect = () => {
-    // Construct the client object and authenticate
+    setLoading(true);
+
     visiClient = new VisiWebRTC({
       server: SERVER,
       email,
@@ -39,7 +43,6 @@ function App() {
       meetingID: meetingId,
       name: displayName,
       callback: function(err, mjwt) {
-        console.log("authed", err, mjwt);
         if (err) {
           alert(err)
           console.log(err);
@@ -57,8 +60,6 @@ function App() {
     visiClient.connectToMeeting({
       meeting_id: meetingId,
       videoStreamAdded: function(id, email, name, camera, isScreenShare) {
-        console.log("videoStreamAdded", id, email, name, camera, isScreenShare);
-
         // optionally, don't get your stream from the server, use the local stream
         if (name === displayName) {
           setVideoStreams((vs) => {
@@ -77,7 +78,6 @@ function App() {
             alert(JSON.stringify(err));
           }
 
-          console.log("enabledRemoteVideo", stream);
           setVideoStreams((vs) => [...vs, { id, email, name, camera, isScreenShare, stream }])
         });
       },
@@ -94,22 +94,39 @@ function App() {
         setInMeeting(true);
 
         visiClient.enableLocalVideo(function(stream) { // enable local video
-          console.log("local video enabled", stream);
           setVideoStreams((vs) => [...vs, { id: "local", stream }])
+          setVideoEnabled(true);
 
           visiClient.enableAudio(); // enable all audio
+
+          setLoading(false);
         }, null, null, videoDevice);
       }
     })
   };
 
-  const disableLocalVideo = () => {
+  const toggleLocalVideo = async () => {
+    setLoading(true);
+    if (videoEnabled) {
+      await client.disableLocalVideo();
+      setVideoEnabled(false);
+      setLoading(false);
+    } else {
+      await client.enableLocalVideo(function(stream) { // enable local video
+        setVideoStreams((vs) => [...vs, { id: "local", stream }])
+        setVideoEnabled(true);
+        setLoading(false);
+      }, null, null, videoDevice);
+    }
   };
 
-  const muteAudioInput = () => {
-  };
-
-  const muteAudioOutput = () => {
+  const toggleAudioInput = () => {
+    if (inputMuted) {
+      client.unMuteAudioInput();
+    } else {
+      client.muteAudioInput();
+    }
+    setInputMuted(!inputMuted);
   };
 
   function exitMeeting() {
@@ -118,8 +135,6 @@ function App() {
   }
 
   const formValid = meetingId && displayName;
-
-  console.log("videoStreams", videoStreams);
 
   return (
     <Box sx={{ display: "flex", justifyContent: "top" }}>
@@ -184,22 +199,15 @@ function App() {
           </Select>
         </FormControl>
 
-        <Button variant="contained" id="join_button" onClick={connect} disabled={inMeeting || !formValid}>Join Meeting</Button>
+        <Button variant="contained" id="join_button" onClick={connect} disabled={inMeeting || !formValid || loading}>Join Meeting</Button>
 
-        <Button variant="outlined" color="error" id="exit_button" onClick={exitMeeting} disabled={!inMeeting}>Exit Meeting</Button>
+        <Button variant="outlined" color="error" id="exit_button" onClick={exitMeeting} disabled={!inMeeting || loading}>Exit Meeting</Button>
 
-        {/*
-        <Button disabled={!inMeeting} variant="outlined" onClick={disableLocalVideo}>{videoEnabled ? "Enable" : "Disable"} Local Video</Button>
-        <Button disabled={!inMeeting} variant="outlined" onClick={muteAudioInput}>{inputMuted ? "Unmute" : "Mute"} Audio Input</Button>
-        <Button disabled={!inMeeting} variant="outlined" onClick={muteAudioOutput}>{outputMuted ? "Unmute" : "Mute"} Audio Output</Button>
-        */}
-
-        {/*
-          <input className="meeting-only" type="range" id="output_volume" min="0" max="1" step="0.1" value="1" style={{ maxWidth: "40%" }} />
-          */}
+        <Button disabled={!inMeeting || loading} variant="outlined" onClick={toggleLocalVideo}>{videoEnabled ? "Disable" : "Enable"} Local Video</Button>
+        <Button disabled={!inMeeting || loading} variant="outlined" onClick={toggleAudioInput}>{inputMuted ? "Unmute" : "Mute"} Audio Input</Button>
       </Stack>
 
-      <Box id="videos" sx={{
+      <Box sx={{
         display: "flex", flexWrap: "wrap", gap: 1, p: 2
       }}>
         {videoStreams.map((v) => <Video key={v.id} video={v} />)}
@@ -222,8 +230,8 @@ const Video = ({ video }) => {
   }
 
   return (
-    <Box className="video-container" id={video.id} key={video.id} sx={{ border: "1px solid #ccc" }}>
-      <Box className="video-title" sx={{ p: 1, display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,255,255,0.5)" }}>
+    <Box id={video.id} key={video.id}>
+      <Box sx={{ p: 1, display: "flex", justifyContent: "space-between", alignItems: "center", background: "#eee" }}>
         {`${video.name} ${video.camera ? ` - ${video.camera}` : ""}`}
       </Box>
       <video ref={(el) => videoRef.current = el} autoPlay={true} style={{ height: "300px" }} />

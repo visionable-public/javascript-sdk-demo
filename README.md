@@ -35,38 +35,39 @@ const visiClient = new VisiWebRTC({
 
 ## Joining a Meeting
 ```js
-  visiClient.connectToMeeting({
-    meeting_id: meetingID,
-    videoStreamAdded: function(id, email, name, camera, isScreenShare) {
-      // this callback is called for local and remote videos
+visiClient.connectToMeeting({
+  meeting_id: meetingID,
+  videoStreamAdded: function(id, email, name, camera, isScreenShare) {
+    // this callback is called for local and remote videos
 
-      // to automatically enable all video streams
-      visiClient.enableRemoteVideo(id, function(err, stream) {
-        if (err) {
-          // handle error
-        }
-        // add video stream to data structure
-        // e.g. setVideoStreams((vs) => [...vs, { id, email, name, camera, isScreenShare, stream }])
-      });
-    },
-    videoStreamRemoved: function(id) {
-      // remove video stream from data structure
-      // e.g. setVideoStreams((vs) => vs.filter((v) => v.id !== id));
-    },
-    callback: function(err, video_receive_max) {
+    // to automatically enable all video streams
+    visiClient.enableRemoteVideo(id, function(err, stream) {
       if (err) {
         // handle error
-        return;
       }
 
-      // to automatically enable local video on meeting-join
-      visiClient.enableLocalVideo(function(stream) {
-        // add local stream to data structure
-        // e.g. setVideoStreams((vs) => [...vs, { id: "local", stream }])
-
-        // to automatically enable audio on meeting-join
-        visiClient.enableAudio();
-      });
+      // add video stream to data structure
+      // e.g. setVideoStreams((vs) => [...vs, { id, email, name, camera, isScreenShare, stream }])
+    });
+  },
+  videoStreamRemoved: function(id) {
+    // remove video stream from data structure
+    // e.g. setVideoStreams((vs) => vs.filter((v) => v.id !== id));
+  },
+  callback: function(err, video_receive_max) {
+    if (err) {
+      // handle error
+      return;
     }
-  })
+
+    // to automatically enable local video on meeting-join
+    visiClient.enableLocalVideo(function(stream) {
+      // add local stream to data structure
+      // e.g. setVideoStreams((vs) => [...vs, { id: "local", stream }])
+
+      // to automatically enable audio on meeting-join
+      visiClient.enableAudio();
+    });
+  }
+})
 ```

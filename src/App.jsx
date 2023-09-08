@@ -5,6 +5,7 @@ import { VisiWebRTC } from 'visionable-js-sdk';
 import {
   Box,
   Button,
+  Link,
   Stack,
   Select,
   TextField,
@@ -84,7 +85,7 @@ function App() {
       videoStreamRemoved: function(id) {
         setVideoStreams((vs) => vs.filter((v) => v.id !== id));
       },
-      callback: function(err, video_receive_max, meeting_id) {
+      callback: function(err, video_receive_max) {
         if (err) {
           console.log(err);
           alert(err);
@@ -140,6 +141,8 @@ function App() {
     <Box sx={{ display: "flex", justifyContent: "top" }}>
       <Stack sx={{ maxWidth: "300px", p: 2, gap: 2 }}>
         <img src={`https://${SERVER}/images/visionable-login-logo.svg`} />
+
+        <p><Link href="https://bitbucket.org/visionable_development/visionable-js-sdk/">View the source code and documentation</Link></p>
 
         <FormControl>
           <TextField

@@ -6,7 +6,7 @@
 
 ## Installation
 ```console
-npm install bitbucket:visionable_development/visionable-js-sdk#v1.0.1
+npm install bitbucket:visionable_development/visionable-js-sdk
 ```
 
 ## Initialization

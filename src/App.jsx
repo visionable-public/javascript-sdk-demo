@@ -7,10 +7,7 @@ import {
   Button,
   Link,
   Stack,
-  Select,
   TextField,
-  MenuItem,
-  InputLabel,
   FormControl,
 } from '@mui/material';
 
@@ -21,8 +18,6 @@ function App() {
   const [password, setPassword] = useState("");
   const [meetingId, setMeetingId] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [videoDevice, setVideoDevice] = useState("default");
-  const [videoDevices, setVideoDevices] = useState(["default"]);
   const [videoStreams, setVideoStreams] = useState([]);
   const [inMeeting, setInMeeting] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(false);
@@ -91,7 +86,7 @@ function App() {
         visiClient.enableLocalVideo(function(stream) { // enable local video
           setVideoStreams((vs) => [...vs, { id: "local", name: displayName, camera: "Camera", isScreenShare: false, stream }])
           setVideoEnabled(true);
-        }, null, null, videoDevice);
+        }, null, null, "default");
 
         setInMeeting(true);
         setLoading(false);
@@ -108,7 +103,7 @@ function App() {
       await client.enableLocalVideo(function(stream) { // enable local video
         setVideoStreams((vs) => [...vs, { id: "local", name: displayName, camera: "Camera", isScreenShare: false, stream }])
         setVideoEnabled(true);
-      }, null, null, videoDevice);
+      }, null, null, "default");
     }
   };
 
@@ -182,20 +177,6 @@ function App() {
             required
             onChange={(e) => setDisplayName(e.target.value)}
           />
-        </FormControl>
-
-        <FormControl>
-          <InputLabel id="video-device-label">Video Device</InputLabel>
-          <Select
-            labelId="video-device-label"
-            value={videoDevice}
-            label="Video Device"
-            onChange={(e) => setVideoDevice(e.target.value)}
-          >
-            {videoDevices.map((d) => (
-              <MenuItem key={d} value={d}>{d}</MenuItem>
-            ))}
-          </Select>
         </FormControl>
 
         <Button variant="contained" id="join_button" onClick={connect} disabled={inMeeting || !formValid || loading}>Join Meeting</Button>

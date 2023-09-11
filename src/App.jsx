@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 
 const SERVER = "app.visionable.one";
-// let visiClient;
 
 function App() {
   const [email, setEmail] = useState("");
@@ -28,7 +27,6 @@ function App() {
   const [inMeeting, setInMeeting] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(false);
   const [inputMuted, setInputMuted] = useState(false);
-  const [outputMuted, setOututMuted] = useState(false);
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -43,10 +41,9 @@ function App() {
       password,
       meetingID: meetingId,
       name: displayName,
-      callback: function(err, mjwt) {
+      callback: function(err) {
         if (err) {
           alert(err)
-          console.log(err);
           return;
         }
 
@@ -61,21 +58,10 @@ function App() {
     visiClient.connectToMeeting({
       meeting_id: meetingId,
       videoStreamAdded: function(id, email, name, camera, isScreenShare) {
-        // optionally, don't get your stream from the server, use the local stream
-        if (name === displayName) {
-          setVideoStreams((vs) => {
-            const localStream = vs.find((s) => s.id === "local");
-            const rest = vs.filter((s) => s.id !== "local");
-            return [...rest, { id, email, name, camera, isScreenShare, stream: localStream.stream }]
-          });
-
-          return;
-        }
-
-        // automatically enable all remote video streams
+        console.log("videoStreamAdded", id, email, name, camera, isScreenShare);
+        // enable remote video streams as users enter the meeting
         visiClient.enableRemoteVideo(id, function(err, stream) {
           if (err) {
-            console.log(err);
             alert(JSON.stringify(err));
           }
 
@@ -83,40 +69,45 @@ function App() {
         });
       },
       videoStreamRemoved: function(id) {
+        console.log("videoStreamRemoved", id);
         setVideoStreams((vs) => vs.filter((v) => v.id !== id));
       },
-      callback: function(err, video_receive_max) {
+      audioStreamAdded: function(id, email, name) {
+        console.log("audioStreamAdded", id, email, name);
+        // All audio streams are automatically enabled & disabled as users enter and leave meetings.
+        // You can use these callbacks to keep track of meeting participants
+      },
+      audioStreamRemoved: function(id) {
+        console.log("audioStreamRemoved", id);
+      },
+      callback: function(err) {
         if (err) {
-          console.log(err);
           alert(err);
           return;
         }
 
-        setInMeeting(true);
+        visiClient.enableAudio();
 
         visiClient.enableLocalVideo(function(stream) { // enable local video
-          setVideoStreams((vs) => [...vs, { id: "local", stream }])
+          setVideoStreams((vs) => [...vs, { id: "local", name: displayName, camera: "Camera", isScreenShare: false, stream }])
           setVideoEnabled(true);
-
-          visiClient.enableAudio(); // enable all audio
-
-          setLoading(false);
         }, null, null, videoDevice);
+
+        setInMeeting(true);
+        setLoading(false);
       }
     })
   };
 
   const toggleLocalVideo = async () => {
-    setLoading(true);
     if (videoEnabled) {
       await client.disableLocalVideo();
+      setVideoStreams((vs) => vs.filter((v) => v.id !== "local"));
       setVideoEnabled(false);
-      setLoading(false);
     } else {
       await client.enableLocalVideo(function(stream) { // enable local video
-        setVideoStreams((vs) => [...vs, { id: "local", stream }])
+        setVideoStreams((vs) => [...vs, { id: "local", name: displayName, camera: "Camera", isScreenShare: false, stream }])
         setVideoEnabled(true);
-        setLoading(false);
       }, null, null, videoDevice);
     }
   };
@@ -131,7 +122,12 @@ function App() {
   };
 
   function exitMeeting() {
+    setInputMuted(false);
+    setVideoEnabled(false);
+    setVideoStreams([]);
+
     client.disconnect();
+
     setInMeeting(false);
   }
 
